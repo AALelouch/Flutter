@@ -17,12 +17,15 @@ class ListUserState extends State<ListUser> {
   final _db = FirebaseFirestore.instance;
   List<Users>? listUser;
   late Widget _users;
+  late bool _isSearching;
+  final _controller = TextEditingController();
   @override
   void initState() {
     super.initState();
     Firebase.initializeApp();
     listUser = <Users>[];
     _users = const SizedBox();
+    _isSearching = false;
     readData();
   }
 
@@ -30,12 +33,49 @@ class ListUserState extends State<ListUser> {
     "Search User",
     style: TextStyle(color: Color.fromARGB(255, 33, 243, 61)),
   );
+
+  Icon icon = const Icon(
+    Icons.search,
+    color: Colors.white,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: appBarTitle,
-        actions: [],
+        actions: [
+          IconButton(
+            icon: icon,
+            onPressed: () {
+              setState(() {
+                if (icon.icon == Icons.search) {
+                  icon = const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  );
+                  appBarTitle = TextField(
+                    controller: _controller,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                      ),
+                      hintText: "Search..",
+                      hintStyle: TextStyle(color: Colors.white),
+                    ),
+                    onChanged: searchOperation,
+                  );
+                  _handleSearchStart();
+                } else {
+                  searchOperation(null);
+                  _handleSearchEnd();
+                }
+              });
+            },
+          )
+        ],
       ),
       drawer: MenuLateral(),
       body: RefreshIndicator(
@@ -171,6 +211,33 @@ class ListUserState extends State<ListUser> {
       } else {
         _users = const SizedBox();
       }
+    });
+  }
+
+  void searchOperation(String? searchText) {
+    if (_isSearching) {
+      userList(searchText);
+    }
+  }
+
+  void _handleSearchStart() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _handleSearchEnd() {
+    setState(() {
+      _isSearching = false;
+      _controller.clear();
+      icon = const Icon(
+        Icons.search,
+        color: Colors.white,
+      );
+      appBarTitle = const Text(
+        "Search User",
+        style: TextStyle(color: Colors.white),
+      );
     });
   }
 }
