@@ -16,15 +16,17 @@ class ListUserState extends State<ListUser> {
   final _refreshkey = GlobalKey<RefreshIndicatorState>();
   final _db = FirebaseFirestore.instance;
   List<Users>? listUser;
+  late Widget _users;
   @override
   void initState() {
     super.initState();
     Firebase.initializeApp();
     listUser = <Users>[];
+    _users = const SizedBox();
     readData();
   }
 
-  Widget appBarTitle = Text(
+  Widget appBarTitle = const Text(
     "Search User",
     style: TextStyle(color: Color.fromARGB(255, 33, 243, 61)),
   );
@@ -39,7 +41,11 @@ class ListUserState extends State<ListUser> {
       body: RefreshIndicator(
         key: _refreshkey,
         onRefresh: readData,
-        child: ListView(),
+        child: ListView(
+          children: [
+            _users,
+          ],
+        ),
       ),
     );
   }
@@ -84,7 +90,7 @@ class ListUserState extends State<ListUser> {
         decoration: BoxDecoration(
             color: Colors.black26,
             borderRadius: BorderRadius.circular(8.0),
-            boxShadow: <BoxShadow>[
+            boxShadow: const <BoxShadow>[
               BoxShadow(
                 color: Colors.black38,
                 blurRadius: 5.0,
@@ -133,7 +139,7 @@ class ListUserState extends State<ListUser> {
               image: NetworkImage(doc.Image),
               fit: BoxFit.cover,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Color(0xffA4A4A4),
                 blurRadius: 3.0,
@@ -143,5 +149,28 @@ class ListUserState extends State<ListUser> {
     );
   }
 
-  void userList(String? searchText) {}
+  void userList(String? searchText) {
+    setState(() {
+      if (listUser != null) {
+        if (searchText != null || searchText != '') {
+          _users = Column(
+            children: listUser!.map((user) => buildItem(user)).toList(),
+          );
+        } else {
+          var usuario = listUser!
+              .where((element) => element.Name.startsWith(searchText!))
+              .toList();
+          if (usuario.isNotEmpty) {
+            _users = Column(
+              children: usuario.map((user) => buildItem(user)).toList(),
+            );
+          } else {
+            _users = const SizedBox();
+          }
+        }
+      } else {
+        _users = const SizedBox();
+      }
+    });
+  }
 }
