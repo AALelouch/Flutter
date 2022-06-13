@@ -4,7 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_app/details/details_user.dart';
+import 'package:flutter_app/global.dart';
 import 'package:flutter_app/list/user.dart';
+import 'package:flutter_app/menu/animation_route.dart';
 import 'package:flutter_app/menu/menu_lateral.dart';
 
 class ListUser extends StatefulWidget {
@@ -127,9 +130,14 @@ class ListUserState extends State<ListUser> {
 
   GestureDetector card(Users doc) {
     return GestureDetector(
+      onTap: () {
+        Global.doc = doc;
+        Navigator.push(context, Animation_route(DetailUser()))
+            .whenComplete(() => Navigator.of(context).pop());
+      },
       child: Container(
         height: 130.0,
-        margin: EdgeInsets.only(left: 46.0),
+        margin: const EdgeInsets.only(left: 46.0),
         decoration: BoxDecoration(
             color: Colors.black26,
             borderRadius: BorderRadius.circular(8.0),
