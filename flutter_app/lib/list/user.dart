@@ -4,5 +4,8 @@ class Users {
   String Emoji;
   String Image;
   String Email;
-  Users(this.LastName, this.Emoji, this.Name, this.Image, this.Email);
+  String Role;
+  String Active;
+  Users(this.LastName, this.Emoji, this.Name, this.Image, this.Email, this.Role,
+      this.Active);
 }

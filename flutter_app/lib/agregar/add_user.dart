@@ -80,13 +80,17 @@ class UserFormState extends State<UserForm> {
   var name = TextEditingController();
   var lastname = TextEditingController();
   final List _emoji = ["😃", "😆", "🙃", "😅", "😇"];
-  late List<DropdownMenuItem<String>> _dropDownMenuItems;
-  late String _currentEmoji, _image;
+  final List _roles = ["Admin", "User"];
+  late List<DropdownMenuItem<String>> _dropdownMenuItems;
+  late List<DropdownMenuItem<String>> _dropDownRolesItems;
+  late String _currentEmoji, _image, _currentRole;
 
   @override
   void initState() {
-    _dropDownMenuItems = getDropDownMenuItems();
-    _currentEmoji = _dropDownMenuItems[0].value!;
+    _dropdownMenuItems = getDropDownMenuItems();
+    _currentEmoji = _dropdownMenuItems[0].value!;
+    _dropDownRolesItems = getDropDownRoleItems();
+    _currentRole = _dropDownRolesItems[0].value!;
     super.initState();
   }
 
@@ -182,10 +186,17 @@ class UserFormState extends State<UserForm> {
             padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
             child: DropdownButton(
               value: _currentEmoji,
-              items: _dropDownMenuItems,
+              items: _dropdownMenuItems,
               onChanged: changedDropDownItem,
             ),
           ),
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+              child: DropdownButton(
+                value: _currentRole,
+                items: _dropDownRolesItems,
+                onChanged: changedDropDownRoles,
+              )),
           Padding(
             padding:
                 const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
@@ -211,21 +222,21 @@ class UserFormState extends State<UserForm> {
   int _state = 0;
   Widget setUpButtonChild() {
     if (_state == 0) {
-      return Text(
+      return const Text(
         "Registrar",
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontSize: 20,
         ),
       );
     } else if (_state == 1) {
-      return CircularProgressIndicator(
+      return const CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
       );
     } else {
-      return Text(
+      return const Text(
         "Registrar",
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontSize: 20,
         ),
@@ -244,6 +255,7 @@ class UserFormState extends State<UserForm> {
         return 'Enter Valid Email';
       }
     }
+    return null;
   }
 
   String? validatePassword(String? value) {
@@ -254,6 +266,7 @@ class UserFormState extends State<UserForm> {
         return 'por favor ingrese una constraseña de 6 caracteres';
       }
     }
+    return null;
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {
@@ -303,8 +316,10 @@ class UserFormState extends State<UserForm> {
           ref.set({
             'Name': name.text,
             'LastName': lastname.text,
-            'Emoji': '$_currentEmoji',
-            'Image': '$imUrl'
+            'Emoji': _currentEmoji,
+            'Image': imUrl,
+            'Role': _currentRole,
+            'Active': true,
           }).then((value) {
             Navigator.push(context, Animation_route(HomePageMain()))
                 .whenComplete(() => Navigator.of(context).pop());
@@ -326,6 +341,28 @@ class UserFormState extends State<UserForm> {
       setState(() {
         _state = 2;
       });
+    });
+  }
+
+  List<DropdownMenuItem<String>> getDropDownRoleItems() {
+    List<DropdownMenuItem<String>> items = [];
+    for (String item in _roles) {
+      items.add(DropdownMenuItem(
+        value: item,
+        child: Text(
+          item,
+          style: const TextStyle(
+            fontSize: 24,
+          ),
+        ),
+      ));
+    }
+    return items;
+  }
+
+  void changedDropDownRoles(String? selectedRole) {
+    setState(() {
+      _currentRole = selectedRole!;
     });
   }
 }

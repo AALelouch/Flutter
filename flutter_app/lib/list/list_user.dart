@@ -98,11 +98,14 @@ class ListUserState extends State<ListUser> {
           onData.docs
               .map((doc) => {
                     listUser?.add(Users(
-                        doc.data()['LastName'],
-                        doc.data()['Emoji'],
-                        doc.data()['Name'],
-                        doc.data()['Image'],
-                        doc.id)),
+                      doc.data()['LastName'],
+                      doc.data()['Emoji'],
+                      doc.data()['Name'],
+                      doc.data()['Image'],
+                      doc.id,
+                      doc.data()['Role'],
+                      doc.data()['Active'],
+                    )),
                   })
               .toList(),
           userList(null),
@@ -137,30 +140,45 @@ class ListUserState extends State<ListUser> {
                 offset: Offset(0.0, 5.0),
               )
             ]),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '$doc.Name',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                  Text(
-                    '$doc.Emoji',
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                  )
-                ],
-              ),
-              Text(
-                '$doc.LastName',
-                style: TextStyle(fontSize: 24, color: Colors.white),
-              )
-            ],
+        child: Row(children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '$doc.Name',
+                      style: const TextStyle(fontSize: 19, color: Colors.white),
+                    ),
+                    Text(
+                      '$doc.Emoji',
+                      style: const TextStyle(fontSize: 19, color: Colors.white),
+                    )
+                  ],
+                ),
+                Text(
+                  '$doc.LastName',
+                  style: const TextStyle(fontSize: 19, color: Colors.white),
+                )
+              ],
+            ),
           ),
-        ),
+          Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
+              child:
+                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Row(children: [
+                  Text(
+                    '$doc.Role',
+                    style: const TextStyle(fontSize: 19, color: Colors.white),
+                  ),
+                ])
+              ]))
+        ]),
       ),
     );
   }
