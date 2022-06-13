@@ -137,7 +137,7 @@ class ListUserState extends State<ListUser> {
       },
       child: Container(
         height: 130.0,
-        margin: const EdgeInsets.only(left: 46.0),
+        margin: const EdgeInsets.only(left: 40.0),
         decoration: BoxDecoration(
             color: Colors.black26,
             borderRadius: BorderRadius.circular(8.0),
@@ -149,29 +149,34 @@ class ListUserState extends State<ListUser> {
               )
             ]),
         child: Row(children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '$doc.Name',
-                      style: const TextStyle(fontSize: 19, color: Colors.white),
-                    ),
-                    Text(
-                      '$doc.Emoji',
-                      style: const TextStyle(fontSize: 19, color: Colors.white),
-                    )
-                  ],
-                ),
-                Text(
-                  '$doc.LastName',
-                  style: const TextStyle(fontSize: 19, color: Colors.white),
-                )
-              ],
+          Container(
+            width: 250,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '$doc.Name',
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      Text(
+                        '$doc.Emoji',
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.white),
+                      )
+                    ],
+                  ),
+                  Text(
+                    '$doc.LastName',
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  )
+                ],
+              ),
             ),
           ),
           Padding(
@@ -182,7 +187,7 @@ class ListUserState extends State<ListUser> {
                 Row(children: [
                   Text(
                     '$doc.Role',
-                    style: const TextStyle(fontSize: 19, color: Colors.white),
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ])
               ]))

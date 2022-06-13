@@ -5,6 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/details/details_user.dart';
+import '../global.dart';
+import '../list/user.dart';
 import '../main.dart';
 import 'package:flutter_app/menu/animation_route.dart';
 import 'package:flutter_app/menu/menu_lateral.dart';
@@ -50,8 +53,13 @@ class HomePage extends StatelessWidget {
                 color: Color(0xffffffff),
               ),
               onTap: () {
-                Navigator.push(context, Animation_route(UserApp()))
-                    .whenComplete(() => Navigator.of(context).pop());
+                if (Global.doc != null) {
+                  Navigator.push(context, Animation_route(UserApp()))
+                      .whenComplete(() => Navigator.of(context).pop());
+                } else {
+                  Navigator.push(context, Animation_route(UserApp()))
+                      .whenComplete(() => Navigator.of(context).pop());
+                }
               }),
           const SizedBox(
             width: 10,
@@ -84,6 +92,7 @@ class UserFormState extends State<UserForm> {
   late List<DropdownMenuItem<String>> _dropdownMenuItems;
   late List<DropdownMenuItem<String>> _dropDownRolesItems;
   late String _currentEmoji, _image, _currentRole;
+  late bool _isEnable = true;
 
   @override
   void initState() {
@@ -91,6 +100,17 @@ class UserFormState extends State<UserForm> {
     _currentEmoji = _dropdownMenuItems[0].value!;
     _dropDownRolesItems = getDropDownRoleItems();
     _currentRole = _dropDownRolesItems[0].value!;
+    _isEnable = true;
+    if (Global.doc != null) {
+      name.text = Global.doc!.Name;
+      lastname.text = Global.doc!.LastName;
+      email.text = Global.doc!.Email;
+      _currentEmoji = Global.doc!.Emoji;
+      _currentRole = Global.doc!.Role;
+      _image = Global.doc!.Image;
+      password.text = "*******";
+      _isEnable = false;
+    }
     super.initState();
   }
 
@@ -152,35 +172,35 @@ class UserFormState extends State<UserForm> {
             padding:
                 const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
             child: TextFormField(
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(fontSize: 20.0),
-              decoration: InputDecoration(
-                  labelText: "Enter email",
-                  fillColor: Colors.white,
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: const BorderSide())),
-              validator: validateEmail,
-              controller: email,
-            ),
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(fontSize: 20.0),
+                decoration: InputDecoration(
+                    labelText: "Enter email",
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(Icons.email),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: const BorderSide())),
+                validator: validateEmail,
+                controller: email,
+                enabled: _isEnable),
           ),
           Padding(
             padding:
                 const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
             child: TextFormField(
-              obscureText: true,
-              style: const TextStyle(fontSize: 20.0),
-              decoration: InputDecoration(
-                  labelText: "Enter password",
-                  fillColor: Colors.white,
-                  prefixIcon: const Icon(Icons.enhanced_encryption),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: const BorderSide())),
-              validator: validatePassword,
-              controller: password,
-            ),
+                obscureText: true,
+                style: const TextStyle(fontSize: 20.0),
+                decoration: InputDecoration(
+                    labelText: "Enter password",
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(Icons.enhanced_encryption),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: const BorderSide())),
+                validator: validatePassword,
+                controller: password,
+                enabled: _isEnable),
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -205,7 +225,11 @@ class UserFormState extends State<UserForm> {
               height: 60.0,
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
-                  registrar(context);
+                  if (Global.doc == null) {
+                    registrar(context);
+                  } else {
+                    actualizar();
+                  }
                 }
               },
               color: Colors.lightBlue,
@@ -364,5 +388,64 @@ class UserFormState extends State<UserForm> {
     setState(() {
       _currentRole = selectedRole!;
     });
+  }
+
+  actualizar() async {
+    final _firabaseStorageRef = FirebaseStorage.instance;
+    final _db = FirebaseFirestore.instance;
+    var image = CardFoto.croppedFile;
+    var dataImage;
+    var value = false;
+    DocumentReference ref = _db.collection('Users').doc(email.text);
+    setState(() {
+      if (_state == 0) {}
+    });
+    if (image != null) {
+      UploadTask task = _firabaseStorageRef
+          .ref()
+          .child("Users")
+          .child("${email.text}")
+          .putFile(image);
+      task.whenComplete(() async {
+        TaskSnapshot storageTaskSnapshot = task.snapshot;
+        dataImage = await storageTaskSnapshot.ref.getDownloadURL();
+        value = true;
+      });
+    } else {
+      if (_image != null) {
+        dataImage = _image;
+        value = true;
+      } else {
+        value = false;
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Seleccione una imagen')));
+      }
+    }
+    if (value) {
+      ref.set({
+        'Name': name.text,
+        'LastName': lastname.text,
+        'Emoji': _currentEmoji,
+        'Image': dataImage,
+        'Role': _currentRole,
+        'Active': Global.doc!.Active,
+      }).then((value) {
+        Future<DocumentSnapshot<Map<String, dynamic>>> snapshot =
+            _db.collection('Users').doc(email.text).get();
+        snapshot.then((DocumentSnapshot<Map<String, dynamic>> user) {
+          Global.doc = Users(
+            user.data()!['LastName'],
+            user.data()!['Emoji'],
+            user.data()!['Name'],
+            user.data()!['Image'],
+            user.id,
+            user.data()!['Role'],
+            user.data()!['Active'],
+          );
+          Navigator.push(context, Animation_route(DetailUser()))
+              .whenComplete(() => Navigator.of(context).pop());
+        });
+      });
+    }
   }
 }

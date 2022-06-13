@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/agregar/add_user.dart';
+import 'package:flutter_app/global.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/menu/animation_route.dart';
 
@@ -35,6 +36,7 @@ class Menu extends State<MenuLateral> {
               ),
               title: Text("Inicio"),
               onTap: () {
+                Global.doc = null;
                 Navigator.push(context, Animation_route(UserApp()))
                     .whenComplete(() => Navigator.of(context).pop());
               }),
@@ -45,6 +47,7 @@ class Menu extends State<MenuLateral> {
               ),
               title: Text('Registrar'),
               onTap: () {
+                Global.doc = null;
                 Navigator.push(context, Animation_route(AddUser()))
                     .whenComplete(() => Navigator.of(context).pop());
               }),

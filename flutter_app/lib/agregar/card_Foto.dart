@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/agregar/ImagePickerHandler.dart';
+import 'package:flutter_app/global.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CardFotos extends StatefulWidget {
@@ -19,7 +20,7 @@ class CardFoto extends State<CardFotos> with ImagePickerListener {
     imagePicker = ImagePickerHandler(this);
   }
 
-  Widget showImage() {
+  Widget? showImage() {
     if (croppedFile != null) {
       return Image.file(
         croppedFile!,
@@ -27,7 +28,13 @@ class CardFoto extends State<CardFotos> with ImagePickerListener {
         height: 300,
       );
     } else {
-      return Image.asset("assets/logo-google.png");
+      if (Global.doc != null) {
+        setState(() {
+          Image.network(Global.doc!.Image);
+        });
+      } else {
+        return Image.asset("assets/logo-google.png");
+      }
     }
   }
 
