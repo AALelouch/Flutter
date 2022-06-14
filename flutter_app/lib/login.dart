@@ -1,6 +1,10 @@
+import 'dart:html';
+import 'dart:typed_data';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +52,26 @@ class LoginForm extends StatefulWidget {
 class loginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
-    return ListView();
+    return Scaffold(
+      Body: Container(
+        constraints: BoxConstraints.expand(),
+        child: Stack(
+          children: [_getContent()],
+        ),
+      ),
+    );
+  }
+
+  Container _getContent() {
+    return Container(
+      child: Form(
+        Key: _formkey,
+        child: Int8List.view(
+          children: [
+            LoginSummary(horizontal: false),
+          ],
+        ),
+      ),
+    );
   }
 }
