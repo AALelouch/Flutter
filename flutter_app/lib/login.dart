@@ -1,12 +1,19 @@
+import 'dart:async';
 import 'dart:html';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/agregar/validate_text.dart';
+import 'package:flutter_app/global.dart';
+import 'package:flutter_app/list/user.dart';
+import 'package:flutter_app/main.dart';
 
 import 'login/login_summary.dart';
+import 'menu/animation_route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -113,9 +120,92 @@ class loginFormState extends State<LoginForm> {
                 controller: password,
               ),
             ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
+              child: MaterialButton(
+                  minWidth: 200.0,
+                  height: 60.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40)),
+                  onPressed: () {
+                    if (_formkey.currentState!.validate()) {
+                      signInWithCredentials(context);
+                    }
+                  },
+                  child: setUpButtonChild(),
+                  color: Colors.deepOrangeAccent),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  int _state = 0;
+  Widget setUpButtonChild() {
+    if (_state == 0) {
+      return Text(
+        "log in",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      );
+    } else if (_state == 1) {
+      return CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      );
+    } else {
+      return Text(
+        "log in",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      );
+    }
+  }
+
+  void animateButton() {
+    setState(() {
+      _state = 1;
+    });
+    Timer(Duration(seconds: 60), () {
+      setState(() {
+        _state = 2;
+      });
+    });
+  }
+
+  void signInWithCredentials(BuildContext context) {
+    final _auth = FirebaseAuth.instance;
+    final _db = FirebaseFirestore.instance;
+    animateButton();
+    _auth
+        .signInWithEmailAndPassword(email: email.text, password: password.text)
+        .then((value) {
+      // a change was made using the map
+      Future<DocumentSnapshot<Map<String, dynamic>>> snapshot =
+          _db.collection('Users').doc(email.text).get();
+      snapshot.then((DocumentSnapshot<Map<String, dynamic>> user) {
+        Global.user = Users(
+          user.data()!['LastName'],
+          user.data()!['Emoji'],
+          user.data()!['Name'],
+          user.data()!['Image'],
+          user.id,
+          user.data()!['Role'],
+          user.data()!['Active'],
+        );
+        Navigator.push(context, Animation_route(UserApp()))
+            .whenComplete(() => Navigator.of(context).pop());
+      });
+    }).catchError((e) {
+      setState(() {
+        _state = 2;
+      });
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    });
   }
 }

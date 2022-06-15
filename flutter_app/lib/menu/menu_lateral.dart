@@ -4,6 +4,8 @@ import 'package:flutter_app/global.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/menu/animation_route.dart';
 
+import '../login.dart';
+
 class MenuLateral extends StatefulWidget {
   @override
   Menu createState() => Menu();
@@ -18,15 +20,19 @@ class Menu extends State<MenuLateral> {
         children: [
           DrawerHeader(
             child: Text(
-              "Alex",
+              '${Global.user?.Name} ${Global.user?.LastName}',
               style: TextStyle(
                 fontSize: 20,
-                color: Colors.white12,
+                color: Colors.white,
               ),
             ),
             decoration: BoxDecoration(
-              color: Colors.cyanAccent,
+              color: Colors.black54,
               shape: BoxShape.rectangle,
+              image: DecorationImage(
+                image: NetworkImage(Global.user!.Image),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           ListTile(
@@ -51,6 +57,19 @@ class Menu extends State<MenuLateral> {
                 Navigator.push(context, Animation_route(AddUser()))
                     .whenComplete(() => Navigator.of(context).pop());
               }),
+          ListTile(
+            leading: new Icon(
+              Icons.close,
+              color: Colors.white,
+            ),
+            title: Text('Salir'),
+            onTap: () {
+              Global.doc = null;
+              Global.user = null;
+              Navigator.push(context, Animation_route(Login()))
+                  .whenComplete(() => Navigator.of(context).pop());
+            },
+          ),
         ],
       ),
     );
