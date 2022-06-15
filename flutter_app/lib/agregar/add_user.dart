@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/agregar/validate_text.dart';
 import 'package:flutter_app/details/details_user.dart';
 import '../global.dart';
 import '../list/user.dart';
@@ -93,7 +94,7 @@ class UserFormState extends State<UserForm> {
   late List<DropdownMenuItem<String>> _dropDownRolesItems;
   late String _currentEmoji, _image, _currentRole;
   late bool _isEnable = true;
-
+  validateText? validate; //revisar si esta bien por algo se puso el ?
   @override
   void initState() {
     _dropdownMenuItems = getDropDownMenuItems();
@@ -111,6 +112,7 @@ class UserFormState extends State<UserForm> {
       password.text = "*******";
       _isEnable = false;
     }
+    validate = validateText();
     super.initState();
   }
 
@@ -181,7 +183,7 @@ class UserFormState extends State<UserForm> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
                         borderSide: const BorderSide())),
-                validator: validateEmail,
+                validator: validate?.validateEmail, // se agrego el ?
                 controller: email,
                 enabled: _isEnable),
           ),
@@ -198,7 +200,7 @@ class UserFormState extends State<UserForm> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
                         borderSide: const BorderSide())),
-                validator: validatePassword,
+                validator: validate?.validatePassword, // se agrego el ?
                 controller: password,
                 enabled: _isEnable),
           ),
@@ -266,31 +268,6 @@ class UserFormState extends State<UserForm> {
         ),
       );
     }
-  }
-
-  String? validateEmail(String? value) {
-    Pattern pattern =
-        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
-    if (value!.isEmpty) {
-      return 'por favor ingrese el email';
-    } else {
-      RegExp regex = RegExp(pattern.toString());
-      if (!regex.hasMatch(value)) {
-        return 'Enter Valid Email';
-      }
-    }
-    return null;
-  }
-
-  String? validatePassword(String? value) {
-    if (value!.isEmpty) {
-      return 'por favor ingrese el password';
-    } else {
-      if (6 > value.length) {
-        return 'por favor ingrese una constraseña de 6 caracteres';
-      }
-    }
-    return null;
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {

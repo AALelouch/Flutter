@@ -70,5 +70,14 @@ class LoginSummary extends StatelessWidget {
         ],
       ),
     );
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        vertical: 16.0,
+        horizontal: 24.0,
+      ),
+      child: Stack(
+        children: [usertCard, imageThumbnail],
+      ),
+    );
   }
 }

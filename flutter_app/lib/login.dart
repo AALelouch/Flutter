@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/agregar/validate_text.dart';
 
 import 'login/login_summary.dart';
 
@@ -51,6 +52,10 @@ class LoginForm extends StatefulWidget {
 }
 
 class loginFormState extends State<LoginForm> {
+  final _formkey = GlobalKey<FormState>();
+  var email = TextEditingController();
+  var password = TextEditingController();
+  validateText validate = validateText();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,6 +75,44 @@ class loginFormState extends State<LoginForm> {
         child: ListView(
           children: [
             LoginSummary(horizontal: false),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                style: TextStyle(fontSize: 20.0),
+                decoration: InputDecoration(
+                  labelText: "Enter Email",
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(),
+                  ),
+                ),
+                validator: validate.validateEmail,
+                controller: email,
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: TextFormField(
+                obscureText: true,
+                style: TextStyle(fontSize: 20.0),
+                decoration: InputDecoration(
+                  labelText: "Enter Password",
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.enhanced_encryption),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(),
+                  ),
+                ),
+                validator: validate.validatePassword,
+                controller: password,
+              ),
+            ),
           ],
         ),
       ),
