@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html';
 import 'dart:typed_data';
 
@@ -11,14 +12,21 @@ import 'package:flutter_app/agregar/validate_text.dart';
 import 'package:flutter_app/global.dart';
 import 'package:flutter_app/list/user.dart';
 import 'package:flutter_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login/login_summary.dart';
 import 'menu/animation_route.dart';
 
+SharedPreferences? prefs;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(Login());
+  prefs = await SharedPreferences.getInstance();
+  if (prefs?.getString("user") == "") {
+    runApp(Login());
+  } else {
+    runApp(UserApp());
+  }
 }
 
 class Login extends StatelessWidget {
@@ -198,6 +206,8 @@ class loginFormState extends State<LoginForm> {
           user.data()!['Role'],
           user.data()!['Active'],
         );
+        String encodedUser = jsonEncode(Global.user);
+        prefs?.setString('user', encodedUser );
         Navigator.push(context, Animation_route(UserApp()))
             .whenComplete(() => Navigator.of(context).pop());
       });
@@ -205,7 +215,7 @@ class loginFormState extends State<LoginForm> {
       setState(() {
         _state = 2;
       });
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     });
   }
 }
