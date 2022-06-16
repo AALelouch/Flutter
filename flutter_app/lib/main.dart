@@ -1,8 +1,14 @@
+import 'dart:convert';
 import 'dart:html';
+import 'dart:math';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/global.dart';
 import 'package:flutter_app/list/list_user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'list/user.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +43,18 @@ class HomePageMain extends StatefulWidget {
 class _SearchilisState extends State<HomePageMain> {
   @override
   Widget build(BuildContext context) {
+    getUser();
     return Scaffold(
       body: ListUser(),
     );
+  }
+
+  Future<void> getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    Map userMap = jsonDecode(prefs.getString("user"));
+    Global.user = Users.fromJson(userMap);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(Global.user!.Name),
+    ));
   }
 }

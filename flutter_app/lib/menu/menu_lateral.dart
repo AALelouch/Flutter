@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/agregar/add_user.dart';
 import 'package:flutter_app/global.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/menu/animation_route.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../login.dart';
 
@@ -66,6 +68,7 @@ class Menu extends State<MenuLateral> {
             onTap: () {
               Global.doc = null;
               Global.user = null;
+              signOut();
               Navigator.push(context, Animation_route(Login()))
                   .whenComplete(() => Navigator.of(context).pop());
             },
@@ -73,5 +76,14 @@ class Menu extends State<MenuLateral> {
         ],
       ),
     );
+  }
+
+  Future<Future<List<void>>> signOut() async {
+    var prefs = await SharedPreferences.getInstance();
+    final _auth = FirebaseAuth.instance;
+    prefs.setString('user', "");
+    return Future.wait([
+      _auth.signOut(),
+    ]);
   }
 }
