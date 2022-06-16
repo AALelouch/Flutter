@@ -51,8 +51,9 @@ class _SearchilisState extends State<HomePageMain> {
 
   Future<void> getUser() async {
     final prefs = await SharedPreferences.getInstance();
-    Map userMap = jsonDecode(prefs.getString("user"));
-    Global.user = Users.fromJson(userMap);
+   late Map userMap = jsonDecode(prefs.getString("user"));
+   
+    Global?.user = Users.fromJson(userMap);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(Global.user!.Name),
     ));

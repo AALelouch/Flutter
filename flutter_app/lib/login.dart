@@ -6,13 +6,16 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/agregar/validate_text.dart';
 import 'package:flutter_app/global.dart';
 import 'package:flutter_app/list/user.dart';
 import 'package:flutter_app/main.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'login/login_summary.dart';
 import 'menu/animation_route.dart';
@@ -144,6 +147,10 @@ class loginFormState extends State<LoginForm> {
                   child: setUpButtonChild(),
                   color: Colors.deepOrangeAccent),
             ),
+            Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 10.0),
+                child: _signInButton()),
           ],
         ),
       ),
@@ -206,8 +213,9 @@ class loginFormState extends State<LoginForm> {
           user.data()!['Role'],
           user.data()!['Active'],
         );
+
         String encodedUser = jsonEncode(Global.user);
-        prefs?.setString('user', encodedUser );
+        prefs?.setString('user', encodedUser);
         Navigator.push(context, Animation_route(UserApp()))
             .whenComplete(() => Navigator.of(context).pop());
       });
@@ -215,7 +223,120 @@ class loginFormState extends State<LoginForm> {
       setState(() {
         _state = 2;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     });
+  }
+
+  Future<User?> googleSingIn() async {
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    GoogleSignIn _googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
+    final User? user = authResult.user;
+    assert(user?.email != null);
+    assert(user?.displayName != null);
+    final currentUser = await _auth.currentUser;
+    assert(user?.uid == currentUser?.uid);
+    return user;
+  }
+
+  void googleSignInUser() {
+    final _db = FirebaseFirestore.instance;
+    final _firebaseStorageRef = FirebaseStorage.instance;
+    googleSingIn().then((User? data) {
+      Future<DocumentSnapshot<Map<String, dynamic>>> snapshot =
+          _db.collection('Users').doc(email.text).get();
+      snapshot.then((DocumentSnapshot<Map<String, dynamic>> user) {
+        if (user != null && user.exists) {
+          Global.doc = Users(
+            user.data()!['LastName'],
+            user.data()!['Emoji'],
+            user.data()!['Name'],
+            user.data()!['Image'],
+            user.id,
+            user.data()!['Role'],
+            user.data()!['Active'],
+          );
+        } else {
+          var image = imageToFile(imageName: data?.email);
+          image.then((value) {
+            UploadTask task = _firebaseStorageRef
+                .ref()
+                .child('Users')
+                .child(data?.email)
+                .putFile(value);
+            task.whenComplete(() async {
+              TaskSnapshot storageTaskSnapshot = task.snapshot;
+              String imgUrl = await storageTaskSnapshot.ref.getDownloadURL();
+              DocumentReference<Map<String, dynamic>> ref =
+                  _db.collection('Users').doc(data?.email);
+              ref.set({
+                'Name': 'pdhn',
+                'LastName': 'pdhn',
+                'Emoji': "😃",
+                'Image': '$imgUrl',
+                'Role': 'User',
+                'Active': 'true',
+              }).then((value) {
+                Global.user = Users(
+                  'pdhn',
+                  "😃",
+                  'pdhn',
+                  '$imgUrl',
+                  data?.email,
+                  'User',
+                  'true',
+                );
+              });
+            });
+          });
+        }
+
+        String encodeUser = jsonEncode(Global.user);
+        prefs?.setString('user', encodeUser);
+        Navigator.push(context, Animation_route(UserApp()))
+            .whenComplete(() => Navigator.of(context).pop());
+      });
+    }).catchError((e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+      ));
+    });
+  }
+
+  Widget _signInButton() {
+    return MaterialButton(
+      minWidth: 200.0,
+      height: 60.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      onPressed: () {
+        googleSignInUser();
+      },
+      child: Text(
+        'Sign in with Google',
+        style: TextStyle(
+          fontSize: 20,
+          color: Colors.white,
+        ),
+      ),
+      color: Colors.teal,
+    );
+  }
+
+  Future<File> imageToFile({String? imageName}) async {
+    var bytes = await rootBundle.load('assets/logo-google.png');
+    String temPath = (await getTemporaryDirectory()).path;
+    File file = File('$temPath/$imageName.png');
+    await file.writeAsBytes(
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+    return file;
   }
 }
