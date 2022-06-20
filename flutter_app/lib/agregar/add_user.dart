@@ -326,10 +326,9 @@ class UserFormState extends State<UserForm> {
                 .whenComplete(() => Navigator.of(context).pop());
           });
         });
-        // ignore: invalid_return_type_for_catch_error
       }).catchError((e) => {
-                Scaffold.of(context).showBottomSheet(
-                    (context) => SnackBar(content: Text(e.toString())))
+                ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(content: Text(e.message))),
               });
     }
   }
@@ -394,7 +393,7 @@ class UserFormState extends State<UserForm> {
         value = true;
       } else {
         value = false;
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Seleccione una imagen')));
       }
     }

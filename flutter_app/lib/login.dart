@@ -291,19 +291,26 @@ class loginFormState extends State<LoginForm> {
                   "😃",
                   'pdhn',
                   '$imgUrl',
-                  data?.email,
+                  data.email,
                   'User',
                   'true',
                 );
+              }).catchError((e) {
+                Global.user = null;
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.message)));
               });
             });
           });
         }
-
-        String encodeUser = jsonEncode(Global.user);
+        if(Global.user != null){
+            String encodeUser = jsonEncode(Global.user);
         prefs?.setString('user', encodeUser);
         Navigator.push(context, Animation_route(UserApp()))
             .whenComplete(() => Navigator.of(context).pop());
+        }
+
+      
       });
     }).catchError((e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

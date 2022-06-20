@@ -58,21 +58,22 @@ class CardFoto extends State<CardFotos> with ImagePickerListener {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            //error de FlatButton : se soluciona creando una funcion, en la liena 49 la cree
-            FloatingActionButton(
-                backgroundColor: Colors.white10,
+            MaterialButton(
+              child: Text("Galeria"),
+               color: Colors.white10,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.5)),
                 onPressed: () {
-                  //
+                  
                   imagePicker.pickImageFromGallery(ImageSource.gallery);
                 },
-                child: const Text("Galeria")),
+                
+                ),
             const SizedBox(
               width: 10,
             ),
-            FloatingActionButton(
-              backgroundColor: Colors.white10,
+            MaterialButton(
+              color: Colors.white10,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.5)),
               onPressed: () {

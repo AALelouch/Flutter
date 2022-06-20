@@ -22,6 +22,7 @@ class ListUserState extends State<ListUser> {
   late Widget _users;
   late bool _isSearching;
   final _controller = TextEditingController();
+  late BuildContext _context;
   @override
   void initState() {
     super.initState();
@@ -44,6 +45,7 @@ class ListUserState extends State<ListUser> {
 
   @override
   Widget build(BuildContext context) {
+    _context = context;
     return Scaffold(
       appBar: AppBar(
         title: appBarTitle,
@@ -148,50 +150,87 @@ class ListUserState extends State<ListUser> {
                 offset: Offset(0.0, 5.0),
               )
             ]),
-        child: Row(children: [
-          Container(
-            width: 250,
-            child: Padding(
+        child: Row(
+          children: [
+            Container(
+              width: 250,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '$doc.Name',
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.white),
+                        ),
+                        Text(
+                          '$doc.Emoji',
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.white),
+                        )
+                      ],
+                    ),
+                    Text(
+                      '$doc.LastName',
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 60.0),
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     children: [
                       Text(
-                        '$doc.Name',
+                        '$doc.Role',
                         style:
                             const TextStyle(fontSize: 16, color: Colors.white),
                       ),
-                      Text(
-                        '$doc.Emoji',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.white),
-                      )
                     ],
                   ),
-                  Text(
-                    '$doc.LastName',
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  )
+                  Row(
+                    children: [
+                      ClipOval(
+                        child: Material(
+                          color: Colors.blue,
+                          child: InkWell(
+                            splashColor: Colors.teal,
+                            child: SizedBox(
+                              height: 40,
+                              width: 40,
+                              child: Icon(
+                                Icons.delete_forever,
+                                color: doc.Active.toLowerCase() == 'true'
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                            onTap: () {
+                              if (Global.user?.Role == "Admin") {
+                                if (Global.user?.Email == doc.Email) {
+                                  _showMyDialog(doc);
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ),
-          ),
-          Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
-              child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Row(children: [
-                  Text(
-                    '$doc.Role',
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ])
-              ]))
-        ]),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -270,5 +309,47 @@ class ListUserState extends State<ListUser> {
         style: TextStyle(color: Colors.white),
       );
     });
+  }
+
+  Future _showMyDialog(Users doc) async {
+    var value =
+        doc.Active.toLowerCase() == 'True' ? "Inhabilitar" : "habilitar";
+    return showDialog(
+      context: _context,
+      builder: (_) => AlertDialog(
+        title: Text(value),
+        content: Text(doc.Email),
+        actions: [
+          MaterialButton(
+            child: Text("Cancelar"),
+            color: Colors.blue,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          MaterialButton(
+            child: Text(value),
+            color: Colors.blue,
+            onPressed: () {
+              actualizar(doc);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  actualizar(Users doc) {
+    final _db = FirebaseFirestore.instance;
+    DocumentReference ref = _db.collection('Users').doc(doc.Email);
+    ref.set({
+      'Name': doc.Name,
+      'LastName': doc.LastName,
+      'Emoji': doc.Emoji,
+      'Image': doc.Image,
+      'Role': doc.Role,
+      'Active': doc.Active.toLowerCase() == 'true' ? "false" : "true",
+    }).then((value) {});
   }
 }
