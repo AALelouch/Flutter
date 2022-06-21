@@ -9,8 +9,7 @@ class Users {
   Users(this.LastName, this.Emoji, this.Name, this.Image, this.Email, this.Role,
       this.Active);
 
-  Users.fromJson(
-    Map<String, dynamic> json)
+  Users.fromJson(Map<dynamic, dynamic> json)
       : LastName = json['LastName'],
         Emoji = json['Emoji'],
         Name = json['Name'],
@@ -19,15 +18,13 @@ class Users {
         Role = json['Role'],
         Active = json['Active'];
 
-        
-
   Map<String, dynamic> toJson() => {
-    'LastName' :LastName,
-    'Emoji':Emoji,
-    'Name':Name,
-    'Image':Image,
-    'Email':Email,
-    'Role':Role,
-    'Active':Active
-  };
+        'LastName': LastName,
+        'Emoji': Emoji,
+        'Name': Name,
+        'Image': Image,
+        'Email': Email,
+        'Role': Role,
+        'Active': Active
+      };
 }

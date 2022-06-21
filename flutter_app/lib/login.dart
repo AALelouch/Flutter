@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -271,7 +271,7 @@ class loginFormState extends State<LoginForm> {
             UploadTask task = _firebaseStorageRef
                 .ref()
                 .child('Users')
-                .child(data?.email)
+                .child("${data!.email}")
                 .putFile(value);
             task.whenComplete(() async {
               TaskSnapshot storageTaskSnapshot = task.snapshot;
@@ -282,7 +282,7 @@ class loginFormState extends State<LoginForm> {
                 'Name': 'pdhn',
                 'LastName': 'pdhn',
                 'Emoji': "😃",
-                'Image': '$imgUrl',
+                'Image': imgUrl,
                 'Role': 'User',
                 'Active': 'true',
               }).then((value) {
@@ -290,8 +290,8 @@ class loginFormState extends State<LoginForm> {
                   'pdhn',
                   "😃",
                   'pdhn',
-                  '$imgUrl',
-                  data.email,
+                  imgUrl,
+                  data.email!,
                   'User',
                   'true',
                 );
@@ -303,14 +303,12 @@ class loginFormState extends State<LoginForm> {
             });
           });
         }
-        if(Global.user != null){
-            String encodeUser = jsonEncode(Global.user);
-        prefs?.setString('user', encodeUser);
-        Navigator.push(context, Animation_route(UserApp()))
-            .whenComplete(() => Navigator.of(context).pop());
+        if (Global.user != null) {
+          String encodeUser = jsonEncode(Global.user);
+          prefs?.setString('user', encodeUser);
+          Navigator.push(context, Animation_route(UserApp()))
+              .whenComplete(() => Navigator.of(context).pop());
         }
-
-      
       });
     }).catchError((e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
